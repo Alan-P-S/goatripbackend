@@ -8,7 +8,14 @@ const cors = require("cors")
 
 const app = express()
 
-app.use(cors())
+
+const allowedOrigins = ['http://localhost:3000', 'https://ctgoa.netlify.app']; // Replace with your actual client URLs
+
+const corsOptions = {
+  origin: allowedOrigins
+};
+
+app.use(cors(corsOptions));
 app.use(express.json())
 
 /* -----------------------------
