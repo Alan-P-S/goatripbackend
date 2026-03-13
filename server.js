@@ -17,7 +17,7 @@ const corsOptions = {
   origin: allowedOrigins
 };
 
-cron.schedule("*/10 * * * *",()=>{
+cron.schedule("*/5 * * * *",()=>{
    https.get("https://goatripbackend.onrender.com");
    console.log("Pinged to keep alive");
 })
@@ -49,20 +49,14 @@ process.exit(1)
    MySQL Connection
 ----------------------------- */
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
 host: process.env.DB_HOST,
 user: process.env.DB_USER,
 password: process.env.DB_PASSWORD,
 database: process.env.DB_NAME
 })
 
-db.connect(err=>{
-if(err){
-console.error("❌ MySQL Connection Error:",err.message)
-process.exit(1)
-}
-console.log("✅ MySQL Connected")
-})
+
 
 /* -----------------------------
    Cloudinary Config
