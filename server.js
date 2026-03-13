@@ -5,7 +5,9 @@ const multer = require("multer")
 const cloudinary = require("cloudinary").v2
 const mysql = require("mysql2")
 const cors = require("cors")
-
+const { Http2ServerRequest } = require("http2")
+const cron = require("node-cron");
+const https = require("https");
 const app = express()
 
 
@@ -15,6 +17,10 @@ const corsOptions = {
   origin: allowedOrigins
 };
 
+cron.schedule("*/10 * * * *",()=>{
+   https.get("https://goatripbackend.onrender.com");
+   console.log("Pinged to keep alive");
+})
 app.use(cors(corsOptions));
 app.use(express.json())
 
@@ -93,9 +99,17 @@ cb(null,true)
 }
 })
 
+//Default get Route
+
+app.get("/",(req,res)=>{
+   res.send("default get route");
+   console.log("GET HOME ROUTE...");
+})
+
 /* -----------------------------
    Upload Image Route
 ----------------------------- */
+
 
 app.post("/upload",upload.single("image"),async(req,res)=>{
 
