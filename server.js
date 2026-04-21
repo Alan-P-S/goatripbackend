@@ -11,23 +11,23 @@ const https = require("https");
 const http = require('http');
 const {Server} = require('socket.io');
 
-
+const allowedOrigins = ['http://localhost:3000','http://localhost:5173' ,'https://ctgoa.netlify.app']; // Replace with your actual client URLs
 const app = express()
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server,{
+   cors:{
+      origin:allowedOrigins,
+      methods:["GET","POST"]
+   }
+});
 
 app.set('view engine','ejs');
-const allowedOrigins = ['http://localhost:3000','http://localhost:5173' ,'https://ctgoa.netlify.app']; // Replace with your actual client URLs
-
-const corsOptions = {
-  origin: allowedOrigins
-};
 
 cron.schedule("*/5 * * * *",()=>{
    https.get("https://goatripbackend.onrender.com");
    console.log("Pinged to keep alive");
 })
-app.use(cors(corsOptions));
+
 app.use(express.json())
 
 /* -----------------------------
@@ -112,6 +112,21 @@ app.get("/",(req,res)=>{
 
 app.get('/display', (req, res) => {
     res.render('display');
+});
+
+
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    socket.on('trigger-camera', () => {
+        console.log('Button clicked! Requesting image from camera...');
+        // Send a signal to ALL connected clients (including the React app)
+        io.emit('start-capture'); 
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
 });
 
 app.post('/image-upload', upload.single('image'), (req, res) => {
