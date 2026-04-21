@@ -8,10 +8,16 @@ const cors = require("cors")
 const { Http2ServerRequest } = require("http2")
 const cron = require("node-cron");
 const https = require("https");
+const http = require('http');
+const {Server} = require('socket.io');
+
+
 const app = express()
+const server = http.createServer(app);
+const io = new Server(server);
 
-
-const allowedOrigins = ['http://localhost:3000', 'https://ctgoa.netlify.app']; // Replace with your actual client URLs
+app.set('view engine','ejs');
+const allowedOrigins = ['http://localhost:3000','http://localhost:5173' ,'https://ctgoa.netlify.app']; // Replace with your actual client URLs
 
 const corsOptions = {
   origin: allowedOrigins
@@ -103,6 +109,23 @@ app.get("/",(req,res)=>{
 /* -----------------------------
    Upload Image Route
 ----------------------------- */
+
+app.get('/display', (req, res) => {
+    res.render('display');
+});
+
+app.post('/image-upload', upload.single('image'), (req, res) => {
+    if (!req.file) return res.status(400).send('No file uploaded.');
+
+    // Convert the image buffer to a Base64 string
+    const base64Image = req.file.buffer.toString('base64');
+    const imageData = `data:${req.file.mimetype};base64,${base64Image}`;
+
+    // Emit the image data to all connected clients
+    io.emit('new-image', imageData);
+
+    res.status(200).send('Image sent to display!');
+});
 
 
 app.post("/upload",upload.single("image"),async(req,res)=>{
@@ -224,6 +247,6 @@ error:"Something went wrong"
    Start Server
 ----------------------------- */
 
-app.listen(process.env.PORT,()=>{
+server.listen(process.env.PORT,()=>{
 console.log(`🚀 Server running on port ${process.env.PORT}`)
 })

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Real-Time Display</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>Latest Received Image</h1>
+    <div id="image-container">
+      <p>Waiting for images...</p>
+    </div>
+
+    <script>
+      const socket = io();
+      const container = document.getElementById("image-container");
+
+      socket.on("new-image", (dataUri) => {
+        // Update the container with the new image
+        container.innerHTML = `<img src="${dataUri}" style="max-width: 100%; border: 2px solid #333;">`;
+      });
+    </script>
+  </body>
+</html>
